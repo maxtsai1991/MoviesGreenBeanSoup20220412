@@ -25,6 +25,16 @@ import com.example.moviesgreenbeansoup.databinding.ActivityMainBinding
  * 不需經過認證,或是帳號申請 EX : 1. 政府資料開放平臺https://data.gov.tw/  2. 臺北市資料大平臺https://data.taipei/  3. 內政資料開放平臺https://data.moi.gov.tw/MoiOD/default/Index.aspx
  * 需經過認證,或是帳號申請 EX : 藍新https://www.newebpay.com/website/Page/content/download_api
  */
+
+/**
+ * API串接應用
+ * 13-3 註冊電影API,建立專案
+ * 1. 實作電影資料的API(TMDB,https://www.themoviedb.org/?language=zh-TW) , 註冊帳號,填寫使用者名稱,密碼,確認密碼,電子郵件
+ * 2. TMDB ACC & PW :  KotlinMaxTsai20220412 / Max800320 ,進到個人檔案 > 左邊點選API (https://www.themoviedb.org/settings/api) > 點選請求一個API金鑰 > 點選Developer開發者腳色 > 填寫必要資訊
+ * 3. 進入API 文件說明https://developers.themoviedb.org/3/getting-started/introduction
+ * 4. 建立Android 專案 > 選Basic Activity 命名為moviesgreenbeansoup ,語言記得是Kotlin ,移除不必要的程式碼 , 像是content_main.xml 的nav_host_fragment元件刪除 ,而MainActivity.kt相對應的nav程式碼也要刪除
+ * 5. 程式規範該專案必須連線網路 ,去manifests ,添加 <uses-permission android:name="android.permission.INTERNET"/>
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
