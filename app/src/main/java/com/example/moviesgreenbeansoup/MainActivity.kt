@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-    // test1
+    // test12
 //    override fun onSupportNavigateUp(): Boolean {
 //        val navController = findNavController(R.id.nav_host_fragment_content_main)
 //        return navController.navigateUp(appBarConfiguration)
