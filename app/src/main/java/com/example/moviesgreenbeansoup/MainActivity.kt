@@ -13,7 +13,9 @@ import com.example.moviesgreenbeansoup.databinding.ActivityMainBinding
 
 
 /**
- *
+ * API串接應用
+ * 13-1 什麼是API ? 有哪些種類
+ * 該章節,主要是說明如何連接別人的API, API 全名Application Interface ,API一定有文件,讓你知道怎樣可以讀到你想要的資料,API泛指外部資料的介面
  */
 class MainActivity : AppCompatActivity() {
 
