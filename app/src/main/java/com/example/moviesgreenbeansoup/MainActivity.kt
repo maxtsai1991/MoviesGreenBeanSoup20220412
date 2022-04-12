@@ -10,8 +10,10 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.moviesgreenbeansoup.databinding.ActivityMainBinding
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,12 +81,57 @@ import java.net.URL
  *      Log.d(TAG, "onCreate: ${it.title}");
  *    }
  */
+
+/**
+ * API串接應用
+ * 13-6 展示清單資料-進階RecyclerView好評電影瀏覽 (該章節是使用匿名內部類別的ViewHolder)
+ * 1.   content_main.xml ) 先拉RecyclerView元件,並設定ID : recycler
+ * 2.   build.gradle(Module) ) 添加必要外掛(才有辦法快速利用此外掛,得到Layout上的元件) :
+ *          id 'kotlin-kapt' // Android Jetpack
+ *          id 'kotlin-android-extensions'
+ * 2-1. 設定是否為固定大小 EX : recycler.setHasFixedSize(true)
+ * 2-2. 設定Layout管理器 EX : recycler.layoutManager = LinearLayoutManager(this)
+ * 3.   MovieAdapter ) 接下來創建Adapter > 在Package(moviesgreenbeansoup)上按右鍵 > New > Kotlin File/Class >命名MovieAdapter(Class) EX : class MovieAdapter { }
+ * 4.   MovieAdapter ) 並且在Adapter創建匿名內部類別的ViewHolder , 並繼承ViewHolder,參數放view , 而MovieViewHolder傳入一個View類別 EX : inner class MovieViewHolder(view : View) : RecyclerView.ViewHolder(view)
+ * 5.   movie_row.xml ) 設計一個Layout ,一列資料(單列資料)的Layout > layout > New > Layout Resource File > 命名movie_row.xml ,
+ *      拉一個ImageView,設置ID:movie_poster , 再拉一個TextView(電影名稱),設置ID:movie_title , 再拉一個TextView(評分),設置ID:movie_pop
+ * 6.   MovieAdapter ) 在MovieViewHolder把剛剛單列資料的item放入後 , 就可以回頭設計Adapter EX :
+ *      val poster = itemView.movie_poster
+ *      val title = itemView.movie_title
+ *      val popularity = itemView.movie_pop
+ * 7.   MovieAdapter ) MovieAdapter 繼承Adapter(androidx.recyclerview.widget.RecyclerView), 裡面一定要有一個ViewHolder , 之後在呼叫空建構子() EX : class MovieAdapter  : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>(){ }
+ * 8.   接著實做Adapter身上的三個方法 (燈泡熱鍵>覆寫 1.onCreateViewHolder 2.onBindViewHolder 3.getItemCount)
+ * 9.   onCreateViewHolder ) 在onCreateViewHolder方法裡要產生一個view , 並且return MovieViewHolder,把view交給它 EX :
+ *      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
+ *          val view = LayoutInflater.from(parent.context) .inflate(R.layout.movie_row, parent , false)
+ *          return MovieViewHolder(view)
+ *      }
+ * 10.  onBindViewHolder ) 資料來的時候要怎麼辦,就onBindViewHolder,holder身上的title,等於得到的資料,那個電影名稱 EX : holder.title.setText(movie.title)
+ * 10-1.在MovieAdapter設計一個建構子,讓它把所有資料放進來 , 要用var讓資料可以改變 EX : (var movies : List<Movie>)
+ * 10-2.所有的電影(movies)如果不是null,在執行run裡面的工作 EX :  movies?.run { }
+ * 10-3.先得到一個電影,就從movies裡面的List集合去get這個position資料 EX : val movie = movies.get(position)
+ * 10-4.接下來在設定電影的熱門度(電影評分) , 它是一個Double型態, 再toString就可以轉型 EX : holder.popularity.setText(movie.popularity.toString())
+ * 11.  getItemCount ) 接下來是資料數量 , 如果你的movies,給它size,是null的話要給0
+ *      override fun getItemCount(): Int {
+ *          return movies.size ?: 0
+ *      }
+ * 12. MainActivity.kt ) 生出adapter , 將adapter 改成全域屬性 EX :
+ *     private lateinit var adapter: MovieAdapter
+ *     adapter = MovieAdapter(result.results) // 生出adapter , 要在CoroutineScope協程裡面,因為協程已經抓到TMDB API資料了
+ * 13. MainActivity.kt ) 存取UI元件,不能在其他的UI執行緒上,為了避免,所以要使用runOnUiThread,讓設定adapter的工作,在UI執行緒執行 EX :  runOnUiThread { }
+ * 14. MainActivity.kt ) 將adapter設定到recycler的adapter EX : recycler.adapter = adapter
+ * 14. MainActivity.kt ) 當拿到資料後,要重整(刷新) EX : adapter.notifyDataSetChanged()
+ * 15. movie_row.xml ) 嚴重BUG記得檢查 , ConstraintLayout元件的layout_height(高度)改成wrap_content(符合內容物高度就好)
+ */
+
 class MainActivity : AppCompatActivity() {
+    private lateinit var adapter: MovieAdapter //  lateinit 意思是晚一點才會生出來
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var binding: ActivityMainBinding
+
     companion object{
         val TAG = MainActivity::class.java.simpleName
     }
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,14 +145,33 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+
+        // RecyclerView的必要設定 , 要添加第二點必要外掛,才能找到recycler元件
+        recycler.setHasFixedSize(true) // 設定是否為固定大小
+        recycler.layoutManager = LinearLayoutManager(this) // Layout管理器
+
+
+
         CoroutineScope(Dispatchers.IO).launch {
             val data = URL("https://api.themoviedb.org/3/movie/popular?api_key=8bf9f7ac5da357c4c0d5f04b41504e76&language=zh-TW&page=1").readText() // 讀取API Json
             Log.d(TAG, "onCreate: $data")
+
             // 使用Gson的類別庫,先用建構子()產生Gson的物件,在呼叫fromJson的方法,fromJson方法第"一"個參數給"字串資料" , 第"二"個參數給目標的結果類別,這樣就可以產生出一個集合 EX : val result = Gson().fromJson(data,MovieResult::class.java)
             val result = Gson().fromJson(data,MovieResult::class.java)
+
             result.results.forEach {
                 Log.d(TAG, "onCreate: ${it.title}");
             }
+
+            // 生出Adapter
+            adapter = MovieAdapter(result.results)
+
+            // 注意: 存取UI元件,不能在其他的UI執行緒上,為了避免,所以要使用runOnUiThread,讓設定adapter的工作,在UI執行緒執行
+            runOnUiThread {
+                recycler.adapter = adapter // 將adapter設定到recycler的adapter
+                adapter.notifyDataSetChanged() // 刷新
+            }
+
         }
 
     }
