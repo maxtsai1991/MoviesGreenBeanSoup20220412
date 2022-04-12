@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.example.moviesgreenbeansoup.databinding.ActivityMainBinding
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,6 +64,21 @@ import java.net.URL
  *     在協程裡,先確認有無連線到TMDB API, EX : val data = URL("https://api.themoviedb.org/3/movie/popular?api_key=8bf9f7ac5da357c4c0d5f04b41504e76&language=zh-TW&page=1").readText() ,
  *     並且插Log EX : Log.d(TAG, "onCreate: $data"); , 插LOG的TAG,必須創一個TAG屬性欄位 , 用companion object{}包起來 , EX : val TAG = MainActivity::class.java.simpleName
  */
+
+/**
+ * API串接應用
+ * 13-5 JSON資料與解析,使用外掛建立data class (1.讀取API Json 2.設計data class 3.用Gson解析Json資料)
+ * 補充說明 : 先安裝 data class的JSON To Kotlin Class 外掛 > 雙擊兩下Shift > 搜尋Plugins > 並在Marketplace標籤下搜尋 JSON To Kotlin Class (圖示是一個藍色有J K 英文的圖示),並且安裝它
+ * 1. 安裝完外掛後 , 在Package(moviesgreenbeansoup)上按右鍵 > New > Kotlin File/Class , 新建一個Kotlin Class檔案,
+ *    在Data.kt檔案下,使用快捷鍵Alt + Insert > 點選 Kotlin data classes from JSON ,
+ *    並將TMDB Raw格式 (Postman也有Raw標籤), 貼到中間大白框裡面, 並命名 MovieResult ,這樣就是快速產生data class的方法
+ * 2. 利用Gson比較好的工具,來整批解析變成是一個集合,添加 Gson Libs類別庫 , 在build.gradle(Module)添加:implementation 'com.google.code.gson:gson:2.9.0'
+ * 3. MainActivity.kt ) 使用Gson的類別庫,先用建構子()產生Gson的物件,在呼叫fromJson的方法,fromJson方法第"一"個參數給"字串資料" , 第"二"個參數給目標的結果類別,這樣就可以產生出一個集合 EX : val result = Gson().fromJson(data,MovieResult::class.java)
+ *    接下來從result裡面,可以得到很多個結果,再用forEach{}迴圈,把一個一個電影的標題(電影名稱),LOGD出來, EX :
+ *    result.results.forEach {
+ *      Log.d(TAG, "onCreate: ${it.title}");
+ *    }
+ */
 class MainActivity : AppCompatActivity() {
     companion object{
         val TAG = MainActivity::class.java.simpleName
@@ -83,11 +99,18 @@ class MainActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
         CoroutineScope(Dispatchers.IO).launch {
-            val data = URL("https://api.themoviedb.org/3/movie/popular?api_key=8bf9f7ac5da357c4c0d5f04b41504e76&language=zh-TW&page=1").readText()
-            Log.d(TAG, "onCreate: $data");
+            val data = URL("https://api.themoviedb.org/3/movie/popular?api_key=8bf9f7ac5da357c4c0d5f04b41504e76&language=zh-TW&page=1").readText() // 讀取API Json
+            Log.d(TAG, "onCreate: $data")
+            // 使用Gson的類別庫,先用建構子()產生Gson的物件,在呼叫fromJson的方法,fromJson方法第"一"個參數給"字串資料" , 第"二"個參數給目標的結果類別,這樣就可以產生出一個集合 EX : val result = Gson().fromJson(data,MovieResult::class.java)
+            val result = Gson().fromJson(data,MovieResult::class.java)
+            result.results.forEach {
+                Log.d(TAG, "onCreate: ${it.title}");
+            }
         }
 
     }
+
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
