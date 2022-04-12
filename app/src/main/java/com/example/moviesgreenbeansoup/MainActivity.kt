@@ -17,6 +17,14 @@ import com.example.moviesgreenbeansoup.databinding.ActivityMainBinding
  * 13-1 什麼是API ? 有哪些種類
  * 該章節,主要是說明如何連接別人的API, API 全名Application Interface ,API一定有文件,讓你知道怎樣可以讀到你想要的資料,API泛指外部資料的介面
  */
+
+/**
+ * API串接應用
+ * 13-2 常見的API架構與應用
+ * 搜尋open data ,
+ * 不需經過認證,或是帳號申請 EX : 1. 政府資料開放平臺https://data.gov.tw/  2. 臺北市資料大平臺https://data.taipei/  3. 內政資料開放平臺https://data.moi.gov.tw/MoiOD/default/Index.aspx
+ * 需經過認證,或是帳號申請 EX : 藍新https://www.newebpay.com/website/Page/content/download_api
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
