@@ -126,14 +126,14 @@ import java.net.URL
 
 /**
  * API串接應用
- * 13-7 RecyclerView圖片處理 - 使用Coil類別庫 (把TMDP API 所抓到的圖片,放到ImageView上來顯示)
+ * 13-7 RecyclerView圖片處理 - 使用Coil類別庫 (把TMDB API 所抓到的圖片,放到ImageView上來顯示)
  *  補充說明:
- *      TMDP API 有細項說明如何取得 API的圖片 (https://developers.themoviedb.org/3/getting-started/images)
- *      如寬度是500的照片,完整TMDP圖片URL是 : https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.png , w500 是型態,寬度500點的意思
- *      TMDP API 的照片 欄位是 "poster_path" (可以從Postman輸入URL後查看下面個欄位,使用GET,URL:https://api.themoviedb.org/3/movie/popular?api_key=8bf9f7ac5da357c4c0d5f04b41504e76&language=zh-TW&page=1)
+ *      TMDB API 有細項說明如何取得 API的圖片 (https://developers.themoviedb.org/3/getting-started/images)
+ *      如寬度是500的照片,完整TMDB圖片URL是 : https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.png , w500 是型態,寬度500點的意思
+ *      TMDB API 的照片 欄位是 "poster_path" (可以從Postman輸入URL後查看下面個欄位,使用GET,URL:https://api.themoviedb.org/3/movie/popular?api_key=8bf9f7ac5da357c4c0d5f04b41504e76&language=zh-TW&page=1)
  *      如Android(Java開發) , 抓取圖檔類別庫有 Glide , Picaso , Fresco , 而Kotlin開發抓取圖檔類別庫則是Coil ,該章節Coil有搭配Coroutines協程
  *  1.  build.gradle(Module) ) 導入Coil Libs EX : implementation("io.coil-kt:coil:2.0.0-rc03")
- *  2.  得到TMDP資料的時候,是跑到onBindViewHolder方法裡 , 怎麼使用 ? 使用 holder.poster在呼叫.load()方法,接著要把網址"https://image.tmdb.org/t/p/w500"放到方法裡,在w500後面加上API圖片的變數(poster_path) EX : holder.poster.load("https://image.tmdb.org/t/p/w500${movie.poster_path}"){ }
+ *  2.  得到TMDB資料的時候,是跑到onBindViewHolder方法裡 , 怎麼使用 ? 使用 holder.poster在呼叫.load()方法,接著要把網址"https://image.tmdb.org/t/p/w500"放到方法裡,在w500後面加上API圖片的變數(poster_path) EX : holder.poster.load("https://image.tmdb.org/t/p/w500${movie.poster_path}"){ }
  *  3.  在讀API圖檔時,還沒讀到的話,可以用placeholder()方法,此方法會顯示還沒讀到API圖時顯示的圖片 EX : placeholder(R.drawable.movie_poster)
  *  3-1.圓形圖顯示 EX : transformations(CircleCropTransformation())
  *  3-2.讀不到API圖時顯示的圖片 EX : error(R.drawable.error_movie_poster)
